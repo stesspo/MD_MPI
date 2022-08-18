@@ -4,10 +4,10 @@
 
 
 #   -   make
-#   -   mpirun -np ${ranks} MD_mpi.o ${parameterfile}
+#   -   mpirun -np @{ranks} MD_mpi.o @{parameterfile}
 
 ## example:
-#   -   generate parameter files specifying number of particles and density (in reduced units) with: ./initCubicLattice.o ${npart} ${density*}
+#   -   generate parameter files specifying number of particles and density (in reduced units) with: ./initCubicLattice.o @{npart} @{density*}
 #   -   run with: mpirun -np 4 MD_mpi.o /input/generated_grid.par
 
 
