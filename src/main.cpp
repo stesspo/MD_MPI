@@ -385,15 +385,6 @@ MPI_Reduce(&nTimeMv_Vl, &mvl_time, 1, MPI_DOUBLE, MPI_SUM, 0, p.comm);
 MPI_Reduce(&nTimeLost, &print_time, 1, MPI_DOUBLE, MPI_SUM, 0, p.comm);
 
 
-
-
-// printf("[Process %d]: Coordinate [%d]\n", mpi_rank, p.x);
-// printf("[Process %d]: Neighbour E [%d], Neighbour W [%d]\n", mpi_rank, p.neighbour_east, p.neighbour_west);
-// printf("[Process %d] Domain X: %f -> %f\n", mpi_rank, d.startx, d.endx);
-
-
-
-
 if(p.x == 0){
 printf ("total time elapsed: %g milliseconds\n", (global_time) / 1000.0);    //milliseconds
 printf ("total time force: %g milliseconds\n", (force_time) / 1000.0); 
