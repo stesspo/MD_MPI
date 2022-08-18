@@ -15,9 +15,9 @@ if os.path.exists('./phys_output.dat'):
     epot.append(values[2])
     ekin.append(values[3])
 
-  plt.plot(time, etot, '-k', label = '<etot>')
-  plt.plot(time, epot, '--k', label = '<epot>')
-  plt.plot(time, ekin, '-.k', label = '<ekin>')
+  plt.plot(time, etot, '-k', label = '$E_{tot}$',c='black')
+  plt.plot(time, epot, '--k', label = '$E_{pot}$'c='blue')
+  plt.plot(time, ekin, '-.k', label = '$E_{kin}$'c='red')
     
   plt.xlabel('time', fontsize = 12)
   plt.ylabel('', fontsize = 12)

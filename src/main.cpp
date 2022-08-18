@@ -129,7 +129,7 @@ d.memory_size = d.npart; //actual memory allocated into local arrays
 // host buffers initialization
 
 
-float d_add_mem = 1.3;  // additional memory added to arrays
+float d_add_mem = 2;  // additional memory added to arrays
 // ----------------
 Sizes buff_sizes;
 buff_sizes.local_size = d.npart;
@@ -187,10 +187,10 @@ if(p.x == 0)
   MPI_Reduce(&en, &global_en, 1, MPI_DOUBLE, MPI_SUM, 0, p.comm);
   MPI_Reduce(&v2, &global_k, 1, MPI_DOUBLE, MPI_SUM, 0, p.comm);
 // // E = Mechanical Energy, U = Potential Energy, K = Kinetic Energy, P = Total Momentum, T = Temperature
-// if(p.x == 0){
-//   phys_out<<"#time"<< setw(15) <<"E"<< setw(15) <<"U"<< setw(15) <<"K"<< setw(15) <<"P"<< setw(15) << "T"<<endl;
-//   phys_out<< 0 << setw(10) << double((global_en + global_k)/N) << setw(15) << double(global_en/N) << setw(15) << double(global_k/N) <<endl;
-// }
+if(p.x == 0){
+  phys_out<<"#time"<< setw(15) <<"E"<< setw(15) <<"U"<< setw(15) <<"K"<< setw(15) <<"P"<< setw(15) << "T"<<endl;
+  phys_out<< 0 << setw(10) << double((global_en + global_k)/N) << setw(15) << double(global_en/N) << setw(15) << double(global_k/N) <<endl;
+}
 // ----------------
 
 
@@ -206,12 +206,17 @@ if(p.x == 0)
     MPI_Barrier(MPI_COMM_WORLD);
     double nTimeStop = 0;
     double nTimeLost = 0;
-    double nTimeStart = get_time ();
+    double nTimeInfoEx = 0;
+    double nTimeMv_Vl = 0;
+    double nTimeForce = 0;
+    double nTimeMigra = 0;
+
+
+
+  double nTimeStart = get_time ();
 // -----------------------------------------------------------
   h_LJForces(local_f, local_pos, h_neigh_recvBuffer, en, sigma, epsilon, r_cut, r_skin, boxdim, d.npart, d.neigh_e_recv+d.neigh_w_recv); 
 // --------------------------- Start Loop
-
-
   for(int t = 0; t < iters; t++){
     en = 0;
     v2 = 0;
@@ -224,21 +229,26 @@ if(p.x == 0)
     else
       flag_migration = false; 
     
-    
-
+    nTimeStop = get_time (); 
+// first update of positions and velocities
     h_mv_step(local_pos, local_vel, local_f, local_m, timestep_length, boxdim, d.npart);
+    nTimeMv_Vl += get_time () - nTimeStop; 
+
+    nTimeStop = get_time (); 
+// count of local particles that have left (migrating particles) or are at the limits of the domain (neighbours)
     h_count_neighbours(d, local_pos, boxdim, r_cut, r_skin);
+// get information from other ranks about migrating and neighbouring particles
     get_neighbours_info(d, p, flag_migration);
-
+// check if the number of incoming particles fit inside the memory of the local rank
     h_check_dims(d, p, local_pos, local_vel, local_f, local_m, mi, h_neigh_sendBuffer, h_neigh_recvBuffer, h_migrating_sendBuffer, h_migrating_recvBuffer, h_mass_sendBuffer, h_mass_recvBuffer, flag_migration, buff_sizes, nparts_rank, d_add_mem);
-
+// prepare buffers, which include also infos about velocity and the present force acting on each particle
     h_pack_particles(d, local_pos, local_vel, local_f, local_m, mi, h_neigh_sendBuffer, h_migrating_sendBuffer, h_mass_sendBuffer, boxdim, r_cut, r_skin, flag_migration);   
-
-
+    nTimeInfoEx += get_time () - nTimeStop; 
 
     // The exchange here is written explicitly inside the main code since is done 
-    // while evaluating the pair forces for particles only inside the rank's local
-    // domain.
+    // while evaluating the pair forces for particles only inside the local
+    // domain, since it does not affect local calculations.
+    nTimeStop = get_time (); 
     MPI_Status buff_status[12];
     MPI_Request buff_requests[12];
     int n_requests = 0;
@@ -285,18 +295,26 @@ if(p.x == 0)
     // wait for all ranks to recieve all neighbouring and migrating particles
     MPI_Waitall(n_requests, buff_requests, MPI_STATUS_IGNORE);
 
-
+  
     // evaluation of neighbouring forces
     h_neigh_LJForces(local_f, local_pos, h_neigh_recvBuffer, en, sigma, epsilon, r_cut, r_skin, boxdim, d.npart, d.neigh_e_recv+d.neigh_w_recv);  
+    nTimeForce += get_time () - nTimeStop; 
+
+
+
+    nTimeStop = get_time();
     // final middle velocity step
     h_vl_step(local_vel, local_f, local_m, v2, timestep_length, d.npart);  
+    nTimeMv_Vl += get_time () - nTimeStop; 
 
 
 
-
-    // Fill into each rank domain the incoming particles by removing
+    nTimeStop = get_time ();
+    // Fill into each local domain the incoming particles by removing
     // the migrated ones
     if(flag_migration){
+      // This first loop move all the migrating particles at the end of
+      // the local array 
       for(int i = 0; i < d.migrating_e_send+d.migrating_w_send; i++){
         swap(local_pos[mi[i]], local_pos[d.npart - i - 1]);
         swap(local_vel[mi[i]], local_vel[d.npart - i - 1]);
@@ -312,15 +330,13 @@ if(p.x == 0)
           k++;
       }
     }
-
   // update total number of local particles
   d.npart = nparts_rank[p.x];
+  nTimeMigra += get_time () - nTimeStop; 
 
   // stop timer before printing function
   nTimeStop = get_time ();      
-
   // printing section
-
     if(t % phys_out_freq == 0){
       global_en = 0;
       global_k = 0;
@@ -353,14 +369,40 @@ if(p.x == 0)
 
 
 // // ----------------------------------------- End simulation
+double nTotalTime = get_time () - nTimeStart;
 double global_time = 0;
-double nTotalTime = get_time () - nTimeStart - nTimeLost;
+double infoex_time = 0;
+double force_time = 0;
+double mvl_time = 0;
+double migra_time = 0;
+double print_time = 0;
+
 MPI_Reduce(&nTotalTime, &global_time, 1, MPI_DOUBLE, MPI_SUM, 0, p.comm);
+MPI_Reduce(&nTimeInfoEx, &infoex_time, 1, MPI_DOUBLE, MPI_SUM, 0, p.comm);
+MPI_Reduce(&nTimeForce, &force_time, 1, MPI_DOUBLE, MPI_SUM, 0, p.comm);
+MPI_Reduce(&nTimeMigra, &migra_time, 1, MPI_DOUBLE, MPI_SUM, 0, p.comm);
+MPI_Reduce(&nTimeMv_Vl, &mvl_time, 1, MPI_DOUBLE, MPI_SUM, 0, p.comm);
+MPI_Reduce(&nTimeLost, &print_time, 1, MPI_DOUBLE, MPI_SUM, 0, p.comm);
+
+
+
+
+// printf("[Process %d]: Coordinate [%d]\n", mpi_rank, p.x);
+// printf("[Process %d]: Neighbour E [%d], Neighbour W [%d]\n", mpi_rank, p.neighbour_east, p.neighbour_west);
+// printf("[Process %d] Domain X: %f -> %f\n", mpi_rank, d.startx, d.endx);
+
+
+
 
 if(p.x == 0){
 printf ("total time elapsed: %g milliseconds\n", (global_time) / 1000.0);    //milliseconds
+printf ("total time force: %g milliseconds\n", (force_time) / 1000.0); 
+printf ("total time info exchange: %g milliseconds\n", (infoex_time) / 1000.0); 
+printf ("total time move and velocity steps: %g milliseconds\n", (mvl_time) / 1000.0); 
+printf ("total time migration of particles: %g milliseconds\n", (migra_time) / 1000.0); 
+printf ("total time printing: %g milliseconds\n", (print_time) / 1000.0); 
 }
-
+  MPI_Barrier(MPI_COMM_WORLD);
   MPI_Finalize();
   return 0;
 

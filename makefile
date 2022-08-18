@@ -1,8 +1,7 @@
 # by default select gcc
-# CXX=g++
 CFLAGS= -O3
 
-SRC1 = ./src/particle_sim.cpp ./src/hostsources.cpp 
+SRC1 = ./src/main.cpp ./src/hostsources.cpp 
 all: MD_mpi initGrid
 
 MD_mpi:
