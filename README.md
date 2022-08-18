@@ -1,4 +1,6 @@
-# Usage:
+# Simple MD code optimized with MPI
+
+Usage:
 
 ## makefile compiles the lattice generator "initCubicLattice.o" and the MD simulator "MD_mpi.o" -->
 -   make
