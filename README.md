@@ -4,10 +4,11 @@
 ## Usage
 ### makefile compiles the lattice generator "initCubicLattice.o" and the MD simulator "MD_mpi.o" -->
 -   make
--   mpirun -np @{ranks} MD_mpi.o @{parameterfile}
+-   export OMP_NUM_THREADS= {ranks}
+-   mpirun -np {ranks} MD_mpi.o {parameterfile}
 
 ### example:
--   generate parameter files specifying number of particles and density (in reduced units) with: ./initCubicLattice.o @{npart} @{density*}
+-   generate parameter files specifying number of particles and density (in reduced units) with: ./initCubicLattice.o {npart} {density*}
 -   run with: mpirun -np 4 MD_mpi.o /input/generated_grid.par
 
 ### output:
