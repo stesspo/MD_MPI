@@ -7,17 +7,20 @@ if os.path.exists('./phys_output.dat'):
   etot = []
   epot = []
   ekin = []
-    
-  for line in open('phys_output.dat', 'r'):
+
+
+  file_output = open('phys_output.dat', 'r')
+  next(file_output)
+  for line in file_output:
     values = [float(s) for s in line.split()]
     time.append(values[0])
     etot.append(values[1])
     epot.append(values[2])
     ekin.append(values[3])
 
-  plt.plot(time, etot, '-k', label = '$E_{tot}$',c='black')
-  plt.plot(time, epot, '--k', label = '$E_{pot}$'c='blue')
-  plt.plot(time, ekin, '-.k', label = '$E_{kin}$'c='red')
+  plt.plot(time, etot, '-k', label = '<etot>',c ='black')
+  plt.plot(time, epot, '--k', label = '<epot>', c ='blue')
+  plt.plot(time, ekin, '-.k', label = '<ekin>', c = 'red')
     
   plt.xlabel('time', fontsize = 12)
   plt.ylabel('', fontsize = 12)

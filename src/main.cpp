@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
 	{
 		v2 += (pow(local_vel[i].x, 2) + pow(local_vel[i].y, 2) + pow(local_vel[i].z, 2)) / (2 *local_m[i]);
 		local_f[i].x = 0;
-		local_f[i].x = 0;
+		local_f[i].y = 0;
 		local_f[i].z = 0;
 		for (int j = 0; j < i; j++)
 		{
@@ -183,8 +183,8 @@ int main(int argc, char *argv[])
 	//	// E = Mechanical Energy, U = Potential Energy, K = Kinetic Energy, P = Total Momentum, T = Temperature
 	if (p.x == 0)
 	{
-		phys_out << "#time" << setw(15) << "E" << setw(15) << "U" << setw(15) << "K" << setw(15) << "P" << setw(15) << "T" << endl;
-		phys_out << 0 << setw(10) << double((global_en + global_k) / N) << setw(15) << double(global_en / N) << setw(15) << double(global_k / N) << endl;
+		phys_out << "time" << setw(15) << "E" << setw(15) << "U" << setw(15) << "K" << endl;
+		phys_out << 0 << setw(15) << double((global_en + global_k) / N) << setw(15) << double(global_en / N) << setw(15) << double(global_k / N) << endl;
 	}
 	// ----------------
 
@@ -210,7 +210,7 @@ int main(int argc, char *argv[])
 	// -----------------------------------------------------------
 	h_LJForces(local_f, local_pos, h_neigh_recvBuffer, en, sigma, epsilon, r_cut, r_skin, boxdim, d.npart, d.neigh_e_recv + d.neigh_w_recv);
 	// --------------------------- Start Loop
-	for (int t = 0; t < iters; t++)
+	for (int t = 1; t < iters; t++)
 	{
 		en = 0;
 		v2 = 0;
