@@ -11,6 +11,7 @@ if os.path.exists('./phys_output.dat'):
 
   file_output = open('phys_output.dat', 'r')
   next(file_output)
+  next(file_output)
   for line in file_output:
     values = [float(s) for s in line.split()]
     time.append(values[0])
@@ -18,12 +19,12 @@ if os.path.exists('./phys_output.dat'):
     epot.append(values[2])
     ekin.append(values[3])
 
-  plt.plot(time, etot, '-k', label = '<etot>',c ='black')
-  plt.plot(time, epot, '--k', label = '<epot>', c ='blue')
-  plt.plot(time, ekin, '-.k', label = '<ekin>', c = 'red')
+  plt.plot(time, etot, '-k', label = '<E$_{tot}$>',c ='black')
+  plt.plot(time, epot, '--k', label = '<E$_{pot}$>', c ='blue')
+  plt.plot(time, ekin, '-.k', label = '<E$_{kin}$>', c = 'red')
     
-  plt.xlabel('time', fontsize = 12)
-  plt.ylabel('', fontsize = 12)
+  plt.xlabel('$t_{step}$', fontsize = 12)
+  plt.ylabel('V$_{ij}$', fontsize = 12)
     
   plt.title('Mean Energy', fontsize = 20)
   plt.legend()
