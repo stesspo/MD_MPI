@@ -15,10 +15,15 @@ mpirun -np {ranks} MD_mpi.o {parameterfile}
 mpirun -np 4 MD_mpi.o /input/generated_grid.par
 ```
 ### output:
--   phys_ouput.dat > total, potential and kinetic energy for each timestep 
+-   phys_ouput.dat > total, potential and kinetic energy for each timestep, can be plotted with
+```bash
+python plot.py
+```
+![Alt text](https://i.ibb.co/RHDtDhL/Mean-energy.png "Conservation of total Energy")
+
 -   vtk_output >  vtk DataFile Version 4.0 for each participating rank 
 
-![Alt text](https://i.ibb.co/RHDtDhL/Mean-energy.png "Conservation of total Energy")
+Here a frame of two ranks (blue and red) communicating during interaction
 ![Alt text](https://i.ibb.co/tsxQxt4/blocksbigw.png "Blocks Big")
 
 ## Versions
