@@ -52,7 +52,7 @@ Domain createDomain(Partition p, Box boxdims)
     
     // Size of the local domain
     if(boxdims.x / p.nx <= boxdims.r_min){
-        printf("The input file chosen is meant to be run with less than %i processes.\n", int(round(boxdims.x /  boxdims.r_min)));
+        printf("The boxsize of input file chosen can accomodate less than %i processes.\n", int(round(boxdims.x /  boxdims.r_min)));
         MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
     }
 

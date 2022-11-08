@@ -1,3 +1,5 @@
 .DS_Store
 MD_mpi.o
 initCubicGrid.o
+vtk_output/*
+mean_energy.png

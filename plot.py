@@ -19,12 +19,12 @@ if os.path.exists('./phys_output.dat'):
     epot.append(values[2])
     ekin.append(values[3])
 
-  plt.plot(time, etot, '-k', label = '<E$_{tot}$>',c ='black')
-  plt.plot(time, epot, '--k', label = '<E$_{pot}$>', c ='blue')
-  plt.plot(time, ekin, '-.k', label = '<E$_{kin}$>', c = 'red')
+  plt.plot(time, etot, '-', label = '<E$_{tot}$>',c ='black')
+  plt.plot(time, epot, '-', label = '<E$_{pot}$>', c ='blue')
+  plt.plot(time, ekin, '-', label = '<E$_{kin}$>', c = 'red')
     
   plt.xlabel('$t_{step}$', fontsize = 12)
-  plt.ylabel('V$_{ij}$', fontsize = 12)
+  plt.ylabel('E$^*$', fontsize = 12)
     
   plt.title('Mean Energy', fontsize = 20)
   plt.legend()

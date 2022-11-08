@@ -53,8 +53,7 @@ int main(int argc, char *argv[])
 	MPI_Datatype MPI_Field;
 	int nblocks = 1;
 	int blocklen[1] = { 3 };
-	MPI_Datatype oldtypes[1] = { MPI_DOUBLE
-	};
+	MPI_Datatype oldtypes[1] = { MPI_DOUBLE };
 	MPI_Aint displ[1] = { 0 };
 	MPI_Type_create_struct(nblocks, blocklen, displ, oldtypes, &MPI_Field);
 	MPI_Type_commit(&MPI_Field);
@@ -155,8 +154,11 @@ int main(int argc, char *argv[])
 
 	// ---------------- Output initial conidtions
 	ofstream phys_out;
-	if (p.x == 0)
+	if (p.x == 0){
 		phys_out.open("phys_output.dat");
+		phys_out.precision(5);
+		phys_out << std::fixed;
+	}
 
 	double en = 0;
 	double v2 = 0;
@@ -184,7 +186,7 @@ int main(int argc, char *argv[])
 	if (p.x == 0)
 	{
 		phys_out << "time" << setw(15) << "E" << setw(15) << "U" << setw(15) << "K" << endl;
-		phys_out << 0 << setw(15) << double((global_en + global_k) / N) << setw(15) << double(global_en / N) << setw(15) << double(global_k / N) << endl;
+		phys_out << 0 << setw(15) << double((global_en + global_k) / N) << std::fixed << setw(15) << double(global_en / N) << setw(15) << double(global_k / N) << endl;
 	}
 	// ----------------
 
@@ -236,12 +238,12 @@ int main(int argc, char *argv[])
 		h_check_dims(d, p, local_pos, local_vel, local_f, local_m, mi, h_neigh_sendBuffer, h_neigh_recvBuffer, h_migrating_sendBuffer, h_migrating_recvBuffer, h_mass_sendBuffer, h_mass_recvBuffer, flag_migration, buff_sizes, nparts_rank, d_add_mem);
 		// prepare buffers, which include also infos about velocity and the present force acting on each particle
 		h_pack_particles(d, local_pos, local_vel, local_f, local_m, mi, h_neigh_sendBuffer, h_migrating_sendBuffer, h_mass_sendBuffer, boxdim, r_cut, r_skin, flag_migration);
-		nTimeInfoEx += get_time() - nTimeStop;
+		// nTimeInfoEx += get_time() - nTimeStop;
 
 		// The exchange here is written explicitly inside the main code since is done 
 		// while evaluating the pair forces for particles only inside the local
 		// domain, since it does not affect local calculations.
-		nTimeStop = get_time();
+		// nTimeStop = get_time();
 		MPI_Status buff_status[12];
 		MPI_Request buff_requests[12];
 		int n_requests = 0;
@@ -283,6 +285,9 @@ int main(int argc, char *argv[])
 			}
 		}
 
+		nTimeInfoEx += get_time() - nTimeStop;
+
+		nTimeStop = get_time();
 		// evaluation of local domain forces
 		h_local_LJForces(local_f, local_pos, en, sigma, epsilon, r_cut, r_skin, boxdim, d.npart);
 
@@ -380,6 +385,7 @@ int main(int argc, char *argv[])
 
 	if (p.x == 0)
 	{
+		printf("Simulation ended \n\n - phys_output.dat  ");
 		printf("total time elapsed: %g milliseconds\n", (global_time) / 1000.0);	//milliseconds
 		printf("total time force: %g milliseconds\n", (force_time) / 1000.0);
 		printf("total time info exchange: %g milliseconds\n", (infoex_time) / 1000.0);
