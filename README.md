@@ -11,9 +11,15 @@
 -   generate parameter files specifying number of particles and density (in reduced units) with: ./initCubicLattice.o {npart} {density*}
 -   run with: mpirun -np 4 MD_mpi.o /input/generated_grid.par
 
+```bash
+./initCubicLattice.o 1000 1
+mpirun -np 4 MD_mpi.o /input/generated_grid.par
+```
 ### output:
 -   phys_ouput.dat > total, potential and kinetic energy for each timestep 
 -   vtk_output >  vtk DataFile Version 4.0 for each participating rank 
+
+![Alt text](https://i.ibb.co/RHDtDhL/Mean-energy.png "Conservation of total Energy")
 
 ## Versions
 ### gcc
