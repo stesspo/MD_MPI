@@ -23,7 +23,7 @@ python plot.py
 
 -   vtk_output >  vtk DataFile Version 4.0 for each participating rank 
 
-Here a frame of two ranks (blue and red) communicating during interaction
+Here a frame from ParaView-5.9.1 of two ranks (blue and red) communicating during interaction
 ![Alt text](https://i.ibb.co/tsxQxt4/blocksbigw.png "Blocks Big")
 
 ## Versions
